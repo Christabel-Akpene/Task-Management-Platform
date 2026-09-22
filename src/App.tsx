@@ -3,6 +3,8 @@ import Button from './components/button';
 import './index.css'
 import { useState } from 'react';
 import Modal from './components/modal';
+import TaskList from './components/tasklist';
+import { tasks } from './data';
 
 const task_states = [
   { id: 1, name: 'All' },
@@ -14,6 +16,7 @@ const task_states = [
 function App() {
   const [activeState, setActiveState] = useState("All");
   const [openModal, setOpenModal] = useState(false);
+  const [initialTasks, setInitialTasks] = useState(tasks);
 
   const handleOpenModal = () => {
     setOpenModal(true);
@@ -41,6 +44,15 @@ function App() {
               </Button>
             )
           })}
+        </div>
+
+        <div className='flex flex-col space-y-2'>
+          {
+            initialTasks.map((task) => {
+              return <TaskList key={task.id} taskname={task.taskname} status={task.status}/>;
+            })
+          }
+
         </div>
 
         {

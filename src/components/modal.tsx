@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Button from "./button";
 
-type TaskStatus = "pending" | "in-progress" | "completed";
+export type TaskStatus = "pending" | "in-progress" | "completed";
 
 interface FormData {
     taskname: string;
