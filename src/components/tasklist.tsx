@@ -3,13 +3,17 @@ import type { TaskStatus } from "./modal";
 import { useState } from "react";
 
 interface TaskListProps {
+    id: string;
     taskname: string;
     status: TaskStatus;
+    onDelete: (taskId: string) => void;
+    onEdit: () => void;
+    onStatusChange: (taskId: string, newStatus: TaskStatus) => void;
 }
 
 interface StatusOptionsProps {
     status: TaskStatus;
-    setChangeStatus: React.Dispatch<React.SetStateAction<TaskStatus>>;
+    setChangeStatus: (newStatus: TaskStatus) => void;
 }
 
 const statusColors = {
@@ -20,9 +24,15 @@ const statusColors = {
 
 const options:TaskStatus[] = ["pending", "in-progress", "completed"];
 
-const TaskList = ({ taskname, status }: TaskListProps) => {
+const TaskList = ({ id, taskname, status, onDelete, onEdit, onStatusChange }: TaskListProps) => {
     const [changeStatus, setChangeStatus] = useState(status);
     const [showStatusOptions, setShowStatusOptions] = useState(false);
+
+    const handleStatusChange = (newStatus: TaskStatus) => {
+        setChangeStatus(newStatus);
+        onStatusChange(id, newStatus);
+        setShowStatusOptions(false);
+    }
 
   return (
     <div className="border flex flex-col shadow-sm rounded-md sm:flex-row sm:justify-between sm:items-center p-3">
@@ -36,12 +46,12 @@ const TaskList = ({ taskname, status }: TaskListProps) => {
             {changeStatus}
             {"\u2304"}
           </p>
-            {showStatusOptions && <StatusOptions status={changeStatus} setChangeStatus={setChangeStatus} />}
+          {showStatusOptions && <StatusOptions status={changeStatus} setChangeStatus={handleStatusChange} />}
         </div>
 
         <div className="flex space-x-3">
-          <Pencil size={14} className="cursor-pointer" />
-          <Trash size={14} color="red" className="cursor-pointer " />
+          <Pencil onClick={onEdit} size={14} className="cursor-pointer" />
+          <Trash onClick={()=>onDelete(id)} size={14} color="red" className="cursor-pointer " />
         </div>
       </div>
     </div>

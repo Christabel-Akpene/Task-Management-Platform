@@ -1,6 +1,6 @@
 import type { TaskStatus } from './components/modal';
 
-interface Task {
+export interface Task {
     id: string;
     taskname: string;
     status: TaskStatus;

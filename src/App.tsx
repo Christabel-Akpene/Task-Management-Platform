@@ -2,9 +2,9 @@ import { Plus } from 'lucide-react';
 import Button from './components/button';
 import './index.css'
 import { useState } from 'react';
-import Modal from './components/modal';
+import Modal, { type TaskStatus } from './components/modal';
 import TaskList from './components/tasklist';
-import { tasks } from './data';
+import { tasks, type Task } from './data';
 
 const task_states = [
   { id: 1, name: 'All' },
@@ -17,15 +17,96 @@ function App() {
   const [activeState, setActiveState] = useState("All");
   const [openModal, setOpenModal] = useState(false);
   const [initialTasks, setInitialTasks] = useState(tasks);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+
 
   const handleOpenModal = () => {
+    setEditingTask(null);
     setOpenModal(true);
   }
 
   const handleCloseModal = () => {
     setOpenModal(false);
+    setEditingTask(null);
   }
 
+  const handleAddTask = (taskname: string, status: TaskStatus) => {
+    const newTask = {
+      id: crypto.randomUUID(),
+      taskname,
+      status
+    }
+    setInitialTasks((prevTasks) => [...prevTasks, newTask]);
+    handleCloseModal();
+  }
+
+  const handleDeleteTask = (taskId: string) => {
+    const updatedTasks = initialTasks.filter((task) => {
+      return task.id !== taskId;
+    });
+    setInitialTasks(updatedTasks);
+  }
+
+  const handleEditTask = (taskId: string, newTaskname: string, newStatus: TaskStatus) => {
+    const updatedTasks = initialTasks.map((task) => {
+      if (task.id === taskId){
+        return {
+          ...task,
+          taskname: newTaskname,
+          status: newStatus
+        }
+      }
+      return task;
+    })
+    setInitialTasks(updatedTasks);
+    handleCloseModal();
+  }
+
+  const handleOpenEditModal = (task: Task) => {
+    setEditingTask(task);
+    setOpenModal(true);
+  }
+
+  const totalTasks = initialTasks.length;
+  const pendingTasks = initialTasks.filter((task) => task.status === "pending").length;
+  const inProgressTasks = initialTasks.filter((task) => task.status === "in-progress").length;
+  const completedTasks = initialTasks.filter((task) => task.status === "completed").length;
+
+  const taskCounts = {
+    "All": totalTasks,
+    "Pending": pendingTasks,
+    "In Progress": inProgressTasks,
+    "Completed": completedTasks
+  }
+
+  const filteredTasks = initialTasks.filter((task) => {
+    if (activeState === "All"){
+      return true;
+    }
+    if (activeState === "Pending"){
+      return task.status === "pending";
+    }
+    if (activeState === "In Progress"){
+      return task.status === "in-progress";
+    }
+    if (activeState === "Completed"){
+      return task.status === "completed";
+    }
+    return true;
+  })
+
+  const handleStatusChange = (taskId: string, newStatus: TaskStatus) => {
+    const updatedTasks = initialTasks.map((task) => {
+      if (task.id === taskId){
+        return {
+          ...task,
+          status: newStatus
+        }
+      }
+      return task;
+    })
+    setInitialTasks(updatedTasks);
+  }
 
   return (
     <>
@@ -40,7 +121,7 @@ function App() {
           {task_states.map((state) => {
             return(
               <Button key={state.id} onClick={() => setActiveState(state.name)} className={activeState === state.name ? 'bg-black text-white': ""}>
-                {state.name}
+                {state.name} ({taskCounts[state.name as keyof typeof taskCounts]})
               </Button>
             )
           })}
@@ -48,15 +129,25 @@ function App() {
 
         <div className='flex flex-col space-y-2'>
           {
-            initialTasks.map((task) => {
-              return <TaskList key={task.id} taskname={task.taskname} status={task.status}/>;
+            filteredTasks.map((task) => {
+              return (
+                <TaskList
+                  key={task.id}
+                  id={task.id}
+                  taskname={task.taskname}
+                  status={task.status}
+                  onDelete={handleDeleteTask}
+                  onEdit={()=> handleOpenEditModal(task)}
+                  onStatusChange={handleStatusChange}
+                />
+              );
             })
           }
 
         </div>
 
         {
-          openModal && <Modal onClose={handleCloseModal} />
+          openModal && <Modal onClose={handleCloseModal} onAdd={handleAddTask} onEdit={handleEditTask} initialData={editingTask ?? undefined} />
         }
 
       </section>
