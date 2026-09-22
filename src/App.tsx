@@ -30,10 +30,12 @@ function App() {
     setEditingTask(null);
   }
 
-  const handleAddTask = (taskname: string, status: TaskStatus) => {
+  const handleAddTask = (tasktitle: string, description: string, status: TaskStatus) => {
     const newTask = {
       id: crypto.randomUUID(),
-      taskname,
+      tasktitle,
+      description,
+      date: new Date().toISOString().split('T')[0],
       status
     }
     setInitialTasks((prevTasks) => [...prevTasks, newTask]);
@@ -47,12 +49,14 @@ function App() {
     setInitialTasks(updatedTasks);
   }
 
-  const handleEditTask = (taskId: string, newTaskname: string, newStatus: TaskStatus) => {
+  const handleEditTask = (taskId: string, newTasktitle: string, newDescription: string, newStatus: TaskStatus, ) => {
     const updatedTasks = initialTasks.map((task) => {
       if (task.id === taskId){
         return {
           ...task,
-          taskname: newTaskname,
+          tasktitle: newTasktitle,
+          description: newDescription,
+          date: new Date().toISOString().split('T')[0],
           status: newStatus
         }
       }
@@ -110,46 +114,59 @@ function App() {
 
   return (
     <>
-      <section className="min-h-screen p-4 md:p-8">
+      <section className="min-h-screen p-4 md:p-8 max-w-2xl mx-auto">
         <header className="flex items-center justify-between">
-          <h1 className='font-bold text-2xl'>Task Manager</h1>
-          <Button onClick={handleOpenModal} className="flex space-x-2 items-center bg-black text-white font-semibold">
-            <Plus  size={14}/> <span>Add Task</span>
+          <h1 className="font-bold text-2xl">Task Manager</h1>
+          <Button
+            onClick={handleOpenModal}
+            className="flex space-x-2 items-center bg-black text-white font-semibold"
+          >
+            <Plus size={14} /> <span>Add Task</span>
           </Button>
         </header>
-        <div className='py-4 flex items-center space-x-2 justify-center md:justify-end'>
+        <div className="py-4 flex items-center space-x-2 justify-center">
           {task_states.map((state) => {
-            return(
-              <Button key={state.id} onClick={() => setActiveState(state.name)} className={activeState === state.name ? 'bg-black text-white': ""}>
-                {state.name} ({taskCounts[state.name as keyof typeof taskCounts]})
+            return (
+              <Button
+                key={state.id}
+                onClick={() => setActiveState(state.name)}
+                className={
+                  activeState === state.name ? "bg-black text-white" : ""
+                }
+              >
+                {state.name} (
+                {taskCounts[state.name as keyof typeof taskCounts]})
               </Button>
-            )
+            );
           })}
         </div>
 
-        <div className='flex flex-col space-y-2'>
-          {
-            filteredTasks.map((task) => {
-              return (
-                <TaskList
-                  key={task.id}
-                  id={task.id}
-                  taskname={task.taskname}
-                  status={task.status}
-                  onDelete={handleDeleteTask}
-                  onEdit={()=> handleOpenEditModal(task)}
-                  onStatusChange={handleStatusChange}
-                />
-              );
-            })
-          }
-
+        <div className="flex flex-col space-y-2">
+          {filteredTasks.map((task) => {
+            return (
+              <TaskList
+                key={task.id}
+                id={task.id}
+                tasktitle={task.tasktitle}
+                description={task.description}
+                date={task.date}
+                status={task.status}
+                onDelete={handleDeleteTask}
+                onEdit={() => handleOpenEditModal(task)}
+                onStatusChange={handleStatusChange}
+              />
+            );
+          })}
         </div>
 
-        {
-          openModal && <Modal onClose={handleCloseModal} onAdd={handleAddTask} onEdit={handleEditTask} initialData={editingTask ?? undefined} />
-        }
-
+        {openModal && (
+          <Modal
+            onClose={handleCloseModal}
+            onAdd={handleAddTask}
+            onEdit={handleEditTask}
+            initialData={editingTask ?? undefined}
+          />
+        )}
       </section>
     </>
   );

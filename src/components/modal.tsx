@@ -4,53 +4,94 @@ import Button from "./button";
 export type TaskStatus = "pending" | "in-progress" | "completed";
 
 interface FormData {
-    taskname: string;
+    tasktitle: string;
+    description: string;
+    date: string;
     status: TaskStatus;
 }
 
 interface ModalProps {
-    onClose: () => void;
-    onAdd: (taskname: string, status: TaskStatus) => void;
-    onEdit: (taskId: string, taskname: string, status: TaskStatus) => void;
-    initialData?: {
-        id: string;
-        taskname: string;
-        status: TaskStatus;
-    }
+  onClose: () => void;
+  onAdd: (
+    tasktitle: string,
+    description: string,
+    status: TaskStatus,
+  ) => void;
+  onEdit: (
+    taskId: string,
+    tasktitle: string,
+    description: string,
+    status: TaskStatus,
+  ) => void;
+  initialData?: {
+    id: string;
+    tasktitle: string;
+    description: string;
+    date: string;
+    status: TaskStatus;
+  };
 }
 
 const formDetails: FormData = {
-    taskname: "",
+    tasktitle: "",
+    description: "",
+    date: "",
     status: "pending",
 };
 
 const Modal = ({onClose, onAdd, onEdit, initialData}: ModalProps) => {
 
     const [formData, setFormData] = useState(initialData || formDetails);
-    const [error, setError] = useState("");
+    const [errors, setErrors] = useState({
+        tasktitle: "",
+        description: "",
+    });
 
-    const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value} = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: value
-        }))
-        if (name === "taskname" && value.trim()) {
-            setError("");
-        }
-    }
+    const handleFormChange = (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      >,
+    ) => {
+      const { name, value } = e.target;
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+      if (name === "tasktitle" && value.trim()) {
+        setErrors({ tasktitle: "", description: errors.description });
+      }
+      if (name === "description" && value.trim()) {
+        setErrors({ tasktitle: errors.tasktitle, description: "" });
+      }
+    };
 
     const handleFormSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (!formData.taskname.trim()){
-            setError("Task name is required");
+        
+        const newErrors = {
+            tasktitle: "",
+            description: ""
+        }
+
+        if (!formData.tasktitle.trim()){
+            newErrors.tasktitle = "Task name is required";
+        }
+        if (!formData.description.trim()){
+            newErrors.description = "Description is required";
+        }
+
+        if (newErrors.tasktitle || newErrors.description){
+            setErrors(newErrors);
             return;
         }
-        setError("");
+        
+        setErrors({tasktitle: "", description: ""});
+
         if (initialData) {
-            onEdit(initialData.id, formData.taskname, formData.status);
-        } else{
-            onAdd(formData.taskname, formData.status);
+            onEdit(initialData.id, formData.tasktitle, formData.description, formData.status)
+        } 
+        else{
+            onAdd(formData.tasktitle, formData.description, formData.status);
         }
         setFormData(formDetails);
     }
@@ -58,22 +99,41 @@ const Modal = ({onClose, onAdd, onEdit, initialData}: ModalProps) => {
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-100">
       <div className="p-4 bg-white max-w-md w-full m-4 rounded-md">
-        <h2 className="font-bold text-2xl ">{initialData ? "Edit Task" : "Add Task"}</h2>
+        <h2 className="font-bold text-2xl ">
+          {initialData ? "Edit Task" : "Add Task"}
+        </h2>
         <form onSubmit={handleFormSubmit}>
           <div className="flex flex-col space-y-2 my-2">
-            <label htmlFor="taskname" className="font-semibold">
+            <label htmlFor="tasktitle" className="font-semibold">
               Task Name
             </label>
             <input
               type="text"
               placeholder="task name"
-              id="taskname"
-              name="taskname"
-              value={formData.taskname}
+              id="tasktitle"
+              name="tasktitle"
+              value={formData.tasktitle}
               onChange={handleFormChange}
               className="border p-2 rounded-md"
             />
-            {error && <p className="text-red-500">{error}</p>}
+            {errors.tasktitle && (
+              <p className="text-red-500">{errors.tasktitle}</p>
+            )}
+          </div>
+          <div className="flex flex-col space-y-2 my-2">
+            <label htmlFor="description" className="font-semibold">
+              Description
+            </label>
+            <textarea
+              name="description"
+              id="description"
+              value={formData.description}
+              onChange={handleFormChange}
+              className="border p-2 rounded-md"
+            ></textarea>
+            {errors.description && (
+              <p className="text-red-500">{errors.description}</p>
+            )}
           </div>
           <div className="flex flex-col space-y-2">
             <label htmlFor="status" className="font-semibold">
