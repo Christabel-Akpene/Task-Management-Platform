@@ -30,3 +30,4 @@ A simple Task Management web app built with React and TypeScript.
 - Add, edit, and delete tasks
 - Change task status (Pending, In Progress, Completed)
 - Filter tasks by status
+- Tasks are saved to local storage
