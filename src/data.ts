@@ -1,4 +1,4 @@
-import type { TaskStatus } from "./components/modal";
+import type { TaskStatus } from "./types";
 
 export interface Task {
   id: string;

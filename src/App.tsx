@@ -1,8 +1,9 @@
 import { Plus } from 'lucide-react';
 import Button from './components/button';
 import './index.css'
-import { useState } from 'react';
-import Modal, { type TaskStatus } from './components/modal';
+import { useEffect, useState } from 'react';
+import { type TaskStatus } from './types';
+import Modal from './components/modal';
 import TaskList from './components/tasklist';
 import { tasks, type Task } from './data';
 
@@ -16,8 +17,15 @@ const task_states = [
 function App() {
   const [activeState, setActiveState] = useState("All");
   const [openModal, setOpenModal] = useState(false);
-  const [initialTasks, setInitialTasks] = useState(tasks);
+  const [initialTasks, setInitialTasks] = useState<Task[]>(() => {
+    const savedTasks = localStorage.getItem("tasks");
+    return savedTasks ? JSON.parse(savedTasks) : tasks;
+  });
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+  useEffect(() => {
+    localStorage.setItem("tasks", JSON.stringify(initialTasks));
+  }, [initialTasks]);
 
 
   const handleOpenModal = () => {
@@ -124,15 +132,13 @@ function App() {
             <Plus size={14} /> <span>Add Task</span>
           </Button>
         </header>
-        <div className="py-4 flex items-center space-x-2 justify-center">
+        <div className="py-4 flex items-center space-x-2 overflow-x-auto whitespace-nowrap sm:justify-center">
           {task_states.map((state) => {
             return (
               <Button
                 key={state.id}
                 onClick={() => setActiveState(state.name)}
-                className={
-                  activeState === state.name ? "bg-black text-white" : ""
-                }
+                className={`shrink-0 ${(activeState === state.name) ? "bg-black text-white" : ""}`}
               >
                 {state.name} (
                 {taskCounts[state.name as keyof typeof taskCounts]})

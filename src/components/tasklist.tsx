@@ -1,22 +1,7 @@
 import { Pencil, Trash } from "lucide-react";
-import type { TaskStatus } from "./modal";
+import type { TaskStatus } from "../types";
 import { useState } from "react";
-
-interface TaskListProps {
-    id: string;
-    tasktitle: string;
-    description: string;
-    status: TaskStatus;
-    date: string;
-    onDelete: (taskId: string) => void;
-    onEdit: () => void;
-    onStatusChange: (taskId: string, newStatus: TaskStatus) => void;
-}
-
-interface StatusOptionsProps {
-    status: TaskStatus;
-    setChangeStatus: (newStatus: TaskStatus) => void;
-}
+import type { TaskListProps, StatusOptionsProps } from "../types";
 
 const statusColors = {
     "pending": "text-yellow-500",
@@ -27,11 +12,9 @@ const statusColors = {
 const options:TaskStatus[] = ["pending", "in-progress", "completed"];
 
 const TaskList = ({ id, tasktitle, status, description, date, onDelete, onEdit, onStatusChange }: TaskListProps) => {
-    const [changeStatus, setChangeStatus] = useState(status);
     const [showStatusOptions, setShowStatusOptions] = useState(false);
 
     const handleStatusChange = (newStatus: TaskStatus) => {
-        setChangeStatus(newStatus);
         onStatusChange(id, newStatus);
         setShowStatusOptions(false);
     }
@@ -57,15 +40,15 @@ const TaskList = ({ id, tasktitle, status, description, date, onDelete, onEdit, 
         <div className="relative">
           <p
             onClick={() => setShowStatusOptions(!showStatusOptions)}
-            className={`flex items-center cursor-pointer ${statusColors[changeStatus]}`}
+            className={`flex items-center cursor-pointer ${statusColors[status]}`}
           >
-            {changeStatus}
+            {status}
             {"\u2304"}
           </p>
           {showStatusOptions && (
             <StatusOptions
-              status={changeStatus}
-              setChangeStatus={handleStatusChange}
+              status={status}
+              onStatusChange={handleStatusChange}
             />
           )}
         </div>
@@ -75,12 +58,12 @@ const TaskList = ({ id, tasktitle, status, description, date, onDelete, onEdit, 
 }
 
 
-const StatusOptions = ({status, setChangeStatus}: StatusOptionsProps) => {
+const StatusOptions = ({status, onStatusChange}: StatusOptionsProps) => {
 
     return (
         <div className="bg-white w-32 absolute right-0 top-full mt-1 border rounded-md p-2 shadow-md z-10"  id="status">
             {options.map((statusOption) => (
-                <p onClick={()=> setChangeStatus(statusOption)} key={statusOption} className={`px-3 py-2 cursor-pointer ${statusColors[statusOption]} ${statusOption === status ? "font-semibold" : "" } `}>{statusOption}</p>
+                <p onClick={()=> onStatusChange(statusOption)} key={statusOption} className={`px-3 py-2 cursor-pointer ${statusColors[statusOption]} ${statusOption === status ? "font-semibold" : "" } `}>{statusOption}</p>
             ))}
         </div>
     )

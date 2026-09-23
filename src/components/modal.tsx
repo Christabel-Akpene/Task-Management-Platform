@@ -1,36 +1,6 @@
 import { useState } from "react";
 import Button from "./button";
-
-export type TaskStatus = "pending" | "in-progress" | "completed";
-
-interface FormData {
-    tasktitle: string;
-    description: string;
-    date: string;
-    status: TaskStatus;
-}
-
-interface ModalProps {
-  onClose: () => void;
-  onAdd: (
-    tasktitle: string,
-    description: string,
-    status: TaskStatus,
-  ) => void;
-  onEdit: (
-    taskId: string,
-    tasktitle: string,
-    description: string,
-    status: TaskStatus,
-  ) => void;
-  initialData?: {
-    id: string;
-    tasktitle: string;
-    description: string;
-    date: string;
-    status: TaskStatus;
-  };
-}
+import type { FormData, ModalProps } from "../types";
 
 const formDetails: FormData = {
     tasktitle: "",

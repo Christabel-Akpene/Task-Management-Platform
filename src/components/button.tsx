@@ -1,10 +1,4 @@
-
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    children: React.ReactNode;
-    className?: string;
-    onClick?: () => void;
-}
-    
+import type { ButtonProps } from "../types"
 
 const Button = ({children, className = "", ...props}: ButtonProps) => {
   return (
